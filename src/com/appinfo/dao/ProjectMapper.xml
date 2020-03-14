@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.appinfo.dao.ProjectMapper">
+	<resultMap type="Project" id="proList">
+		<result property="id" column="id" />
+		<result property="userid" column="userid" />
+		<result property="name" column="name" />
+		<result property="bzmoney" column="bzmoney" />
+		<result property="projectname" column="projectname" />
+		<result property="projecttype" column="projecttype" />
+		<result property="projectintr" column="projectintr" />
+		<result property="examine" column="examine" />
+		<result property="auctionstart" column="auctionstart" />
+		<result property="auctionend" column="auctionend" />
+		<result property="auctionnum" column="auctionnum" />
+		<result property="auctionmoney" column="auctionmoney" />
+		<result property="buyer" column="buyer" />
+		<result property="starttime" column="starttime" />
+	</resultMap>
+	<select id="getPorList" resultMap="proList">
+		select p.* , u.name from user
+		u,project p WHERE p.userid=u.id and
+		examine='未审核'
+		<if test="name!=null">
+			and u.name=#{name}
+		</if>
+		order by starttime desc limit
+		#{from},#{pageSize}
+
+	</select>
+	<select id="getPorCount" resultType="Int">
+		select count(1) as count from user u,project p WHERE p.id=u.id
+		<if test="name!=null">
+			and u.name=#{name}
+		</if>
+	</select>
+	<delete id="delete">
+		delete from project where id=#{id}
+	</delete>
+	<select id="getproject" resultType="Project">
+		select * from project where
+		id=#{id}
+	</select>
+	<update id="adoptModify" parameterType="Project">
+		UPDATE project
+		<trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+			<if test="examine != null">examine=#{examine},</if>
+			<if test="examine != null">auctionstart=#{auctionstart},</if>
+			<if test="examine != null">auctionend=#{auctionend},</if>
+		</trim>
+	</update>
+	<update id="Revoke" parameterType="Project">
+		UPDATE project
+		<trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+			<if test="examine != null">examine='错误',</if>
+			<if test="notice != null">notice='异常',</if>
+		</trim>
+	</update>
+	<!-- 前台开始 -->
+	<select id="porlist" resultType="Project">
+		select * from project where
+		userid=#{id}
+	</select>
+	<update id="again">
+		UPDATE project
+		<trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+			examine='未审核',notice=''
+		</trim>
+	</update>
+	<select id="listdowload" resultType="Project">
+		select * from project where
+		buyer=#{buyer}
+	</select>
+	<select id="dowload" resultType="Project">
+		select * from project where
+		id=#{id}
+	</select>
+	<insert id="Add" parameterType="Project">
+		INSERT INTO project
+		(projectname,projecttype,bzmoney,projectintr,examine,filepor,userid,starttime)
+		VALUES
+		(#{projectname},#{projecttype},#{bzmoney},#{projectintr},#{examine},#{filepor},#{userid},now())
+	</insert>
+</mapper>

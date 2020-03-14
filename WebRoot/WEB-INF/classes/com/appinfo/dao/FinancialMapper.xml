@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.appinfo.dao.FinancialMapper">
+	<resultMap type="Financial" id="Financiallist">
+		<result property="id" column="id" />
+		<result property="income" column="income" />
+		<result property="incomepeojectid" column="incomepeojectid" />
+		<result property="incometime" column="incometime" />
+		<result property="projectname" column="projectname" />
+		<result property="num" column="num" />
+		<result property="one" column="one" />
+	</resultMap>
+	<select id="getfinanciallist" resultMap="Financiallist">
+		SELECT
+		SUM(f.income) as
+		num,f.id,f.incomepeojectid,f.incometime
+		,p.projectname
+		FROM
+		financial f
+		,project p
+		WHERE incometime BETWEEN
+		#{start} AND #{end}
+		AND
+		f.incomepeojectid=p.id
+		GROUP BY f.incometime
+		ORDER BY
+		incometime asc
+	</select>
+	<select id="getfrade" resultMap="Financiallist">
+
+		select ceil(
+		p.auctionnum/COUNT(1)*100) as one, p.projectname FROM `user` u,project
+		p
+		where
+		u.jurisdiction='普通'
+		GROUP BY p.auctionnum
+		ORDER BY p.auctionnum
+		DESC
+		LIMIT 3
+
+	</select>
+	<insert id="insertfin" parameterType="Financial">
+		INSERT INTO financial
+		(income,incomepeojectid,incometime) VALUES
+		(#{income},#{incomepeojectid},now())
+	</insert>
+	<select id="FinancialList" resultMap="Financiallist">
+		SELECT f.*,p.projectname FROM financial f,project p where
+		f.incomepeojectid=p.id
+		<if test="incometime!=null">AND f.incometime=#{incometime}</if>
+		order by f.incometime desc limit
+		#{from},#{pageSize}
+	</select>
+	<select id="getFinancialCount" resultType="Int">
+		select count(1) as count from financial
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="incometime!=null">and incometime=#{incometime}
+			</if>
+		</trim>
+	</select>
+	<delete id="delFinancial">
+		DELETE FROM financial where id=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.appinfo.dao.UserMapper">
+	<select id="getLoginUser" resultType="User">
+		select * from user 
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="name != null">
+				and name = #{name} and jurisdiction='管理员'
+			</if>
+		</trim>
+	</select>
+	<update id="update" parameterType="User">
+		UPDATE user SET
+		picture=#{picture} where id =#{id}
+	</update>
+	<select id="getheightUser" resultType="User">
+		SELECT * FROM user ORDER
+		BY grade DESC LIMIT 1
+	</select>
+	<select id="userinfo" resultType="User">
+		SELECT u.* FROM project p,user
+		u where p.userid=u.id AND p.id=#{id}
+	</select>
+	<select id="getuserlist" resultType="User">
+		SELECT * from user
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="name!=null  and name != ''">and name=#{name}</if>
+			<if test="jurisdiction!=null and jurisdiction != ''">and jurisdiction=#{jurisdiction}</if>
+		</trim>
+		order by registration desc limit
+		#{from},#{pageSize}
+	</select>
+	<select id="usercont" resultType="Int">
+		select count(1) as count from user
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="name!=null  and name != ''">and name=#{name}</if>
+			<if test="jurisdiction!=null and jurisdiction != ''">and jurisdiction=#{jurisdiction}</if>
+		</trim>
+	</select>	
+	<delete id="dletetUser">
+		DELETE from user where id=#{id}
+	</delete>
+	<insert id="add" parameterType="User">
+		insert into user
+		(name,email,phone,grade,jurisdiction,balance,registration,pwd,picture)
+		VALUES(#{name},#{email},#{phone},#{grade},#{jurisdiction},#{balance},#{registration},#{pwd},#{picture})
+	</insert>
+	<!-- 开始前台部分 -->
+	<select id="LoginUser" resultType="User">
+		select * from user 
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="name != null">
+				and name = #{name} and jurisdiction='普通'
+			</if>
+		</trim>
+	</select>
+</mapper>

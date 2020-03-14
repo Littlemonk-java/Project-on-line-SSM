@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.appinfo.dao.AuctionMapper">
+	<select id="AuctionList" resultType="Auction">
+		select
+		p.id, p.projectname,u.name,p.auctionnum,p.auctionend
+		,p.bzmoney,p.state from
+		project
+		p,user u where p.userid=u.id AND
+		p.examine='通过'
+		<if test="projectname!=null">and projectname=#{projectname}</if>
+		order by p.auctionnum desc limit
+		#{from},#{pageSize}
+	</select>
+	<select id="AuctionListUser" resultType="Auction">
+		select
+		p.id, p.projectname,u.name,p.auctionnum,p.auctionend
+		,p.bzmoney,p.state from
+		project
+		p,user u where p.userid=u.id AND
+		p.examine='通过' AND p.userid=#{userid}
+		<if test="projectname!=null">and projectname=#{projectname}</if>
+		order by p.auctionnum desc limit
+		#{from},#{pageSize}
+	</select>
+	<select id="Auctioncount" resultType="int">
+		select count(1) as count from project where examine='通过'
+		<if test="projectname!=null">and projectname=#{projectname}</if>
+	</select>
+	<select id="AuctioncountUser" resultType="int">
+		select count(1) as count from project where examine='通过' AND
+		p.userid=#{userid}
+		<if test="projectname!=null">and projectname=#{projectname}</if>
+	</select>
+	<select id="AuctionListbyid" resultType="Auction">
+		select a.projectid,
+		a.contributive,a.contributivetime,u.name from auction a,user u where
+		a.contributiveuserid=u.id AND a.projectid=#{projectid} order by
+		a.contributive desc
+	</select>
+	<update id="AuctionModify" parameterType="Project">
+		UPDATE project
+		<trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+			<if test="auctionmoney != null">auctionmoney=#{auctionmoney},</if>
+			<if test="buyer != null">buyer=#{buyer},</if>
+			<if test="state == null">state='完成',</if>
+		</trim>
+	</update>
+	<select id="userid" resultType="int">
+		SELECT balance FROM user where
+		id=#{id}
+	</select>
+	<update id="upuserid">
+		update user set balance=#{balance} where id=#{id}
+	</update>
+	<select id="buuser" resultType="int">
+		SELECT balance FROM user where
+		name=#{name}
+	</select>
+	<update id="upbyuserid">
+		update user set balance=#{balance} where
+		name=#{name}
+	</update>
+	<select id="selectauction" resultType="Project">
+		SELECT * FROM project where auctionend &gt; now() AND examine='通过'
+		<if test="projecttype!=null">AND projecttype=#{projecttype}</if>
+		<if test="projectname!=null">AND projectname=#{projectname}</if>
+	</select>
+	<insert id="addauction" parameterType="Auction">
+		INSERT INTO auction
+		(projectid,contributive,contributiveuserid,contributivetime)
+		VALUES(#{projectid},#{contributive},#{contributiveuserid},now())
+	</insert>
+	<select id="balance" resultType="int">
+		SELECT balance from user WHERE id=#{id}
+	</select>
+</mapper>
